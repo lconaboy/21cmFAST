@@ -475,6 +475,7 @@ class UserParams(StructWithDefaults):
         "FAST_FCOLL_TABLES": False,
         "USE_2LPT": True,
         "MINIMIZE_MEMORY": False,
+        "CLASS_FILENAME": './transfers.dat'  # LC
     }
 
     _hmf_models = ["PS", "ST", "WATSON", "WATSON-Z"]
