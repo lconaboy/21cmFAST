@@ -465,7 +465,7 @@ class StructWithDefaults(StructWrapper):
             # Find the value of this key in the current class
             if isinstance(val, str):
                 # If it is a string, need to convert it to C string ourselves.
-                val = self.ffi.new("char[]", getattr(self, key).encode())
+                val = self._ffi.new("char[]", getattr(self, key).encode())
 
             try:
                 setattr(self._cstruct, key, val)

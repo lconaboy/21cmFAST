@@ -3,6 +3,7 @@ Various tests of the initial_conditions() function and InitialConditions class.
 """
 import pytest
 
+import os
 import numpy as np
 from multiprocessing import cpu_count
 
@@ -73,6 +74,8 @@ def test_relvels():
             POWER_SPECTRUM=5,
             USE_RELATIVE_VELOCITIES=True,
             N_THREADS=cpu_count(),  # To make this one a bit faster.
+            CLASS_FILENAME=os.path.join(os.getcwd(),
+                                        'test_data/Transfers_z0.dat')  # LC updated test
         ),
     )
 
