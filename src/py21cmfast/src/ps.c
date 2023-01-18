@@ -1267,19 +1267,19 @@ double dNion_General(double lnM, void *params){
 
     double Fstar, Fesc, MassFunction;
 
-    if (Alpha_star > 0. && M > Mlim_Fstar)
-        Fstar = 1./Fstar10;
-    else if (Alpha_star < 0. && M < Mlim_Fstar)
-        Fstar = 1/Fstar10;
-    else
-        Fstar = pow(M/1e10,Alpha_star);
+    /* if (Alpha_star > 0. && M > Mlim_Fstar) */
+    /*     Fstar = 1./Fstar10; */
+    /* else if (Alpha_star < 0. && M < Mlim_Fstar) */
+    /*     Fstar = 1/Fstar10; */
+    /* else */
+    /*     Fstar = pow(M/1e10,Alpha_star); */
 
-    if (Alpha_esc > 0. && M > Mlim_Fesc)
-        Fesc = 1./Fesc10;
-    else if (Alpha_esc < 0. && M < Mlim_Fesc)
-        Fesc = 1./Fesc10;
-    else
-        Fesc = pow(M/1e10,Alpha_esc);
+    /* if (Alpha_esc > 0. && M > Mlim_Fesc) */
+    /*     Fesc = 1./Fesc10; */
+    /* else if (Alpha_esc < 0. && M < Mlim_Fesc) */
+    /*     Fesc = 1./Fesc10; */
+    /* else */
+    /*     Fesc = pow(M/1e10,Alpha_esc); */
 
     if(user_params_ps->HMF==0) {
         MassFunction = dNdM(growthf, M);
@@ -1294,7 +1294,22 @@ double dNion_General(double lnM, void *params){
         MassFunction = dNdM_WatsonFOF_z(z, growthf, M);
     }
 
-    return MassFunction * M * M * exp(-MassTurnover/M) * Fstar * Fesc;
+    // return MassFunction * M * M * exp(-MassTurnover/M) * Fstar * Fesc;
+    Fstar = Fstar10;
+    Fesc = Fesc10;
+    
+    if (M < 1e8) {
+      Fesc = 0.001;
+      Fstar = 0.001;
+    } else if ((M >= 1e8) && (M < 1e9)) {
+      Fesc = 150. / (Fstar * 5000.);  // assumes Pop2_ion = 5000
+    }
+
+    LOG_DEBUG("Fesc: %.4f Fstar: %.4f", Fesc, Fstar);
+    
+    // Ignore turnover mass
+    return MassFunction * M * M * Fstar * Fesc;
+
 }
 
 double Nion_General(double z, double M_Min, double MassTurnover, double Alpha_star, double Alpha_esc, double Fstar10, double Fesc10, double Mlim_Fstar, double Mlim_Fesc){
@@ -1795,6 +1810,9 @@ float Mass_limit_bisection(float Mmin, float Mmax, float PL, float FRAC){
     logMlow = log10(Mmin);
     logMupper = log10(Mmax);
 
+    // LC hack since we don't use the explicit mass-dependencs
+    return Mmin;
+
     if (PL < 0.) {
         if (Mass_limit(logMlow,PL,FRAC) <= 1.) {
             return Mmin;
@@ -2184,21 +2202,36 @@ double dNion_ConditionallnM(double lnM, void *params) {
 
     double Fstar,Fesc;
 
-    if (Alpha_star > 0. && M > Mlim_Fstar)
-        Fstar = 1./Fstar10;
-    else if (Alpha_star < 0. && M < Mlim_Fstar)
-        Fstar = 1./Fstar10;
-    else
-        Fstar = pow(M/1e10,Alpha_star);
+    /* if (Alpha_star > 0. && M > Mlim_Fstar) */
+    /*     Fstar = 1./Fstar10; */
+    /* else if (Alpha_star < 0. && M < Mlim_Fstar) */
+    /*     Fstar = 1./Fstar10; */
+    /* else */
+    /*     Fstar = pow(M/1e10,Alpha_star); */
 
-    if (Alpha_esc > 0. && M > Mlim_Fesc)
-        Fesc = 1./Fesc10;
-    else if (Alpha_esc < 0. && M < Mlim_Fesc)
-        Fesc = 1./Fesc10;
-    else
-        Fesc = pow(M/1e10,Alpha_esc);
+    /* if (Alpha_esc > 0. && M > Mlim_Fesc) */
+    /*     Fesc = 1./Fesc10; */
+    /* else if (Alpha_esc < 0. && M < Mlim_Fesc) */
+    /*     Fesc = 1./Fesc10; */
+    /* else */
+    /*     Fesc = pow(M/1e10,Alpha_esc); */
+    // return M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional(growthf,log(M),M2,del1,del2,sigma2)/sqrt(2.*PI);
 
-    return M*exp(-MassTurnover/M)*Fstar*Fesc*dNdM_conditional(growthf,log(M),M2,del1,del2,sigma2)/sqrt(2.*PI);
+    Fstar = Fstar10;
+    Fesc = Fesc10;
+    LOG_DEBUG("M: %.4e Fesc: %.4f Fstar: %.4f", M, Fesc, Fstar);
+    
+    if (M < 1e8) {
+      Fesc = 0.001;
+      Fstar = 0.001;
+    } else if ((M >= 1e8) && (M < 1e9)) {
+      Fesc = 150. / (Fstar * 5000.);  // assumes Pop2_ion = 5000
+    }
+
+    LOG_DEBUG("M: %.4e Mlim_Fesc: %.4e Mlim_Fstar: %.4e Fesc: %.4f Fstar: %.4f", M, Mlim_Fesc, Mlim_Fstar, Fesc, Fstar);
+    
+    // Ignore turnover mass
+    return M*Fstar*Fesc*dNdM_conditional(growthf,log(M),M2,del1,del2,sigma2)/sqrt(2.*PI);
 }
 
 
